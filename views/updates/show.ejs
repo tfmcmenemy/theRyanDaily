@@ -77,24 +77,29 @@
           <span class="collapse-chevron" aria-hidden="true">⌄</span>
         </summary>
 
-        <div class="collapse-body">
-          <p class="muted">Your question stays attached to this update, so everyone can see the reply.</p>
+        <!-- Animated container -->
+        <div class="collapse-anim" aria-hidden="false">
+          <div class="collapse-anim-inner">
+            <div class="collapse-body">
+              <p class="muted">Your question stays attached to this update, so everyone can see the reply.</p>
 
-          <form method="post" action="/updates/<%= update.id %>/questions" class="form">
-            <div class="form-row">
-              <label>Name (optional)</label>
-              <input class="input inset" name="asker_name" placeholder="Your name" />
+              <form method="post" action="/updates/<%= update.id %>/questions" class="form">
+                <div class="form-row">
+                  <label>Name (optional)</label>
+                  <input class="input inset" name="asker_name" placeholder="Your name" />
+                </div>
+                <div class="form-row">
+                  <label>Contact (optional)</label>
+                  <input class="input inset" name="asker_contact" placeholder="Email or phone (optional)" />
+                </div>
+                <div class="form-row">
+                  <label>Question</label>
+                  <textarea class="input inset" name="question" rows="4" placeholder="Type your question…"></textarea>
+                </div>
+                <button class="btn btn-primary" type="submit">Post question</button>
+              </form>
             </div>
-            <div class="form-row">
-              <label>Contact (optional)</label>
-              <input class="input inset" name="asker_contact" placeholder="Email or phone (optional)" />
-            </div>
-            <div class="form-row">
-              <label>Question</label>
-              <textarea class="input inset" name="question" rows="4" placeholder="Type your question…"></textarea>
-            </div>
-            <button class="btn btn-primary" type="submit">Post question</button>
-          </form>
+          </div>
         </div>
       </details>
     </main>

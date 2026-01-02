@@ -476,7 +476,7 @@ label {
 }
 /* Collapsible card (details/summary) */
 .collapse {
-  padding: 0; /* summary/body will handle padding */
+  padding: 0;
 }
 
 .collapse-summary {
@@ -508,23 +508,44 @@ label {
 .collapse-chevron {
   font-size: 18px;
   line-height: 1;
-  transition: transform 0.15s ease;
+  transition: transform 0.2s ease;
   opacity: 0.7;
 }
 
-/* When open, rotate chevron */
 .collapse[open] .collapse-chevron {
   transform: rotate(180deg);
 }
 
-/* Body area */
-.collapse-body {
-  padding: 0 16px 16px 16px;
+/* Smooth open/close animation using grid rows */
+.collapse-anim {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.28s ease;
 }
 
-/* Optional: subtle inset line separating summary from content */
-.collapse[open] .collapse-body {
+.collapse[open] .collapse-anim {
+  grid-template-rows: 1fr;
+}
+
+/* This is what actually "clips" during animation */
+.collapse-anim-inner {
+  overflow: hidden;
+}
+
+/* Spacing lives inside (so we animate height cleanly) */
+.collapse-body {
+  padding: 0 16px 16px 16px;
   border-top: 1px solid rgba(0, 0, 0, 0.06);
   margin-top: 2px;
   padding-top: 14px;
+}
+
+/* Respect reduced motion users */
+@media (prefers-reduced-motion: reduce) {
+  .collapse-anim {
+    transition: none;
+  }
+  .collapse-chevron {
+    transition: none;
+  }
 }
