@@ -1,0 +1,38 @@
+<%- include("../partials/head", { pageTitle }) %>
+<%- include("../partials/nav", { activeTab }) %>
+
+<main class="content">
+  <header class="page-header">
+    <h1>Contact</h1>
+    <p class="muted">Send one message that everyone can reference later.</p>
+  </header>
+
+  <% if (typeof error !== "undefined") { %>
+    <div class="alert alert-bad"><%= error %></div>
+  <% } %>
+  <% if (typeof success !== "undefined") { %>
+    <div class="alert alert-good"><%= success %></div>
+  <% } %>
+
+  <section class="card">
+    <h2 class="card-title">Message the family</h2>
+    <form method="post" action="/contact" class="form">
+      <div class="form-row">
+        <label>Name (optional)</label>
+        <input class="input inset" name="name" value="<%= (form && form.name) || '' %>" placeholder="Your name" />
+      </div>
+      <div class="form-row">
+        <label>Email (optional)</label>
+        <input class="input inset" name="email" value="<%= (form && form.email) || '' %>" placeholder="you@example.com" />
+      </div>
+      <div class="form-row">
+        <label>Message</label>
+        <textarea class="input inset" name="message" rows="5" placeholder="Write your note…"><%= (form && form.message) || '' %></textarea>
+      </div>
+      <button class="btn btn-primary" type="submit">Send</button>
+      <p class="tiny muted">This saves to the database for now; later you can wire it to email/SMS.</p>
+    </form>
+  </section>
+</main>
+
+<%- include("../partials/footer") %>

@@ -1,0 +1,59 @@
+<%- include("../partials/head", { pageTitle }) %>
+    <%- include("../partials/nav", { activeTab }) %>
+
+        <main class="content">
+            <a class="back-link" href="/admin/support">← Back</a>
+
+            <header class="page-header">
+                <h1>
+                    <%= mode==="new" ? "New support item" : "Edit support item" %>
+                </h1>
+                <p class="muted">This controls what appears on the public Support page.</p>
+            </header>
+
+            <% if (typeof error !=="undefined" ) { %>
+                <div class="alert alert-bad">
+                    <%= error %>
+                </div>
+                <% } %>
+
+                    <section class="card">
+                        <form class="form" method="post"
+                            action="<%= mode === 'new' ? '/admin/support' : ('/admin/support/' + form.id) %>">
+                            <div class="form-row">
+                                <label>Title</label>
+                                <input class="input inset" name="title" value="<%= form.title || '' %>"
+                                    placeholder="Meals / Donations / Rides…" />
+                            </div>
+
+                            <div class="form-row">
+                                <label>Description (optional)</label>
+                                <textarea class="input inset" name="description" rows="4"
+                                    placeholder="Short explanation…"><%= form.description || '' %></textarea>
+                            </div>
+
+                            <div class="form-row">
+                                <label>URL (optional)</label>
+                                <input class="input inset" name="url" value="<%= form.url || '' %>"
+                                    placeholder="https://…" />
+                            </div>
+
+                            <div class="form-row">
+                                <label>Sort order (lower shows first)</label>
+                                <input class="input inset" type="number" name="sort_order"
+                                    value="<%= (form.sort_order ?? 0) %>" />
+                            </div>
+
+                            <div class="form-row" style="flex-direction:row; align-items:center; gap:10px;">
+                                <input type="checkbox" name="is_active" <%=form.is_active ? "checked" : "" %> />
+                                <label style="margin:0;">Active</label>
+                            </div>
+
+                            <button class="btn btn-primary" type="submit">
+                                <%= mode==="new" ? "Create" : "Save" %>
+                            </button>
+                        </form>
+                    </section>
+        </main>
+
+        <%- include("../partials/footer") %>

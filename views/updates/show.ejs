@@ -1,0 +1,102 @@
+<%- include("../partials/head", { pageTitle }) %>
+  <%- include("../partials/nav", { activeTab }) %>
+
+    <main class="content">
+      <a class="back-link" href="/updates">← Back</a>
+
+      <article class="card">
+        <div class="card-top">
+          <h1 class="card-title">
+            <%= update.title %>
+          </h1>
+          <div class="tiny muted">
+            <%= new Date(update.created_at).toLocaleString() %>
+          </div>
+        </div>
+
+        <div class="prose preline">
+          <%= update.body || "" %>
+        </div>
+      </article>
+
+
+
+      <section class="stack" id="questions">
+        <div class="section-head">
+          <h2>Questions</h2>
+          <span class="pill">
+            <%= questions.length %>
+          </span>
+        </div>
+
+        <% if (!questions || questions.length===0) { %>
+          <div class="card">
+            <p class="muted">No questions yet.</p>
+          </div>
+          <% } else { %>
+            <% questions.forEach(q=> { %>
+              <div class="card">
+                <div class="q-head">
+                  <div>
+                    <div class="tiny muted">
+                      <%= q.asker_name ? q.asker_name : "Anonymous" %>
+                        • <%= new Date(q.asked_at).toLocaleString() %>
+                    </div>
+                    <div class="q-text preline">
+                      <%= q.question %>
+                    </div>
+                  </div>
+                </div>
+
+                <% if (q.answer) { %>
+                  <div class="answer">
+                    <div class="answer-label">Answer</div>
+                    <div>
+                      <div class="preline">
+                        <%= q.answer %>
+                      </div>
+                    </div>
+                    <div class="tiny muted">
+                      <%= q.answered_at ? new Date(q.answered_at).toLocaleString() : "" %>
+                    </div>
+                  </div>
+                  <% } else { %>
+                    <div class="tiny muted">Awaiting reply.</div>
+                    <% } %>
+              </div>
+              <% }) %>
+                <% } %>
+      </section>
+
+      <details class="card collapse" id="ask">
+        <summary class="collapse-summary">
+          <div class="collapse-title">
+            Ask a question
+            <span class="collapse-sub muted">Tap to open</span>
+          </div>
+          <span class="collapse-chevron" aria-hidden="true">⌄</span>
+        </summary>
+
+        <div class="collapse-body">
+          <p class="muted">Your question stays attached to this update, so everyone can see the reply.</p>
+
+          <form method="post" action="/updates/<%= update.id %>/questions" class="form">
+            <div class="form-row">
+              <label>Name (optional)</label>
+              <input class="input inset" name="asker_name" placeholder="Your name" />
+            </div>
+            <div class="form-row">
+              <label>Contact (optional)</label>
+              <input class="input inset" name="asker_contact" placeholder="Email or phone (optional)" />
+            </div>
+            <div class="form-row">
+              <label>Question</label>
+              <textarea class="input inset" name="question" rows="4" placeholder="Type your question…"></textarea>
+            </div>
+            <button class="btn btn-primary" type="submit">Post question</button>
+          </form>
+        </div>
+      </details>
+    </main>
+
+    <%- include("../partials/footer") %>

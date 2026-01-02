@@ -1,0 +1,30 @@
+<%- include("../partials/head", { pageTitle }) %>
+<%- include("../partials/nav", { activeTab }) %>
+
+<main class="content">
+  <header class="page-header">
+    <h1>Gallery</h1>
+    <p class="muted">Photos and small wins—easy to find and share.</p>
+  </header>
+
+  <section class="gallery">
+    <% if (!items || items.length === 0) { %>
+      <div class="card">
+        <h2 class="card-title">No photos yet</h2>
+        <p class="muted">For now this uses image URLs stored in the database.</p>
+        <p class="tiny muted">Later we can add uploads (S3/Spaces/Cloudinary).</p>
+      </div>
+    <% } else { %>
+      <% items.forEach(it => { %>
+        <figure class="card gallery-card">
+          <img class="gallery-img" src="<%= it.image_url %>" alt="<%= it.caption || 'Photo' %>" />
+          <% if (it.caption) { %>
+            <figcaption class="tiny muted"><%= it.caption %></figcaption>
+          <% } %>
+        </figure>
+      <% }) %>
+    <% } %>
+  </section>
+</main>
+
+<%- include("../partials/footer") %>

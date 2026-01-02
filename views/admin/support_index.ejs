@@ -1,0 +1,65 @@
+<%- include("../partials/head", { pageTitle }) %>
+    <%- include("../partials/nav", { activeTab }) %>
+
+        <main class="content">
+            <a class="back-link" href="/admin">← Back to admin</a>
+
+            <header class="page-header">
+                <h1>Edit Support</h1>
+                <p class="muted">Add, reorder, enable/disable, or remove support items.</p>
+            </header>
+
+            <div class="admin-actions">
+                <a class="btn btn-primary" href="/admin/support/new">New item</a>
+                <a class="btn btn-soft" href="/support">View Support page</a>
+            </div>
+
+            <section class="stack">
+                <% if (!items || items.length===0) { %>
+                    <div class="card">
+                        <p class="muted">No items yet.</p>
+                    </div>
+                    <% } else { %>
+                        <% items.forEach(it=> { %>
+                            <div class="card">
+                                <div class="card-top">
+                                    <div>
+                                        <h2 class="card-title">
+                                            <%= it.title %>
+                                        </h2>
+                                        <div class="tiny muted">
+                                            Active: <strong>
+                                                <%= it.is_active ? "Yes" : "No" %>
+                                            </strong>
+                                            • Sort: <strong>
+                                                <%= it.sort_order %>
+                                            </strong>
+                                        </div>
+                                    </div>
+                                    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                                        <a class="btn btn-soft" href="/admin/support/<%= it.id %>/edit">Edit</a>
+                                        <form method="post" action="/admin/support/<%= it.id %>/delete"
+                                            style="margin:0;">
+                                            <button class="btn btn-soft" type="submit"
+                                                onclick="return confirm('Delete this item?')">Delete</button>
+                                        </form>
+                                    </div>
+                                </div>
+
+                                <% if (it.description) { %>
+                                    <p class="muted">
+                                        <%= it.description %>
+                                    </p>
+                                    <% } %>
+                                        <% if (it.url) { %>
+                                            <p class="tiny muted">
+                                                <%= it.url %>
+                                            </p>
+                                            <% } %>
+                            </div>
+                            <% }) %>
+                                <% } %>
+            </section>
+        </main>
+
+        <%- include("../partials/footer") %>

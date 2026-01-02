@@ -1,0 +1,45 @@
+<%- include("../partials/head", { pageTitle }) %>
+  <%- include("../partials/nav", { activeTab }) %>
+
+    <main class="content">
+      <header class="page-header">
+        <h1>Support</h1>
+        <p class="muted">Ways to help — kept in one place.</p>
+      </header>
+
+      <% if (isAdmin) { %>
+        <div class="admin-actions">
+          <a class="btn btn-primary" href="/admin/support">Edit Support Page</a>
+        </div>
+        <% } %>
+
+          <section class="grid">
+            <% if (!items || items.length===0) { %>
+              <div class="card">
+                <h2 class="card-title">Nothing posted yet</h2>
+                <p class="muted">When your sister adds links or info, it’ll show up here.</p>
+                <% if (isAdmin) { %>
+                  <a class="btn btn-soft" href="/admin/support">Add support items</a>
+                  <% } %>
+              </div>
+              <% } else { %>
+                <% items.forEach(it=> { %>
+                  <div class="card">
+                    <h2 class="card-title">
+                      <%= it.title %>
+                    </h2>
+                    <% if (it.description) { %>
+                      <p class="muted preline">
+                        <%= it.description %>
+                      </p>
+                      <% } %>
+                        <% if (it.url) { %>
+                          <a class="btn btn-soft" href="<%= it.url %>" target="_blank" rel="noopener">Open</a>
+                          <% } %>
+                  </div>
+                  <% }) %>
+                    <% } %>
+          </section>
+    </main>
+
+    <%- include("../partials/footer") %>

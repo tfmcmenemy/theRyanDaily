@@ -1,0 +1,31 @@
+<%- include("../partials/head", { pageTitle }) %>
+  <%- include("../partials/nav", { activeTab }) %>
+
+    <main class="content">
+      <header class="page-header">
+        <h1>Admin login</h1>
+        <p class="muted">Only your sister should log in to post updates and answer questions.</p>
+      </header>
+
+      <% if (typeof error !=="undefined" ) { %>
+        <div class="alert alert-bad">
+          <%= error %>
+        </div>
+        <% } %>
+
+          <section class="card">
+            <form method="post" action="/admin/login" class="form">
+              <div class="form-row">
+                <label>Email</label>
+                <input class="input inset" type="text" name="email" placeholder="admin@example.com" required />
+              </div>
+              <div class="form-row">
+                <label>Password</label>
+                <input class="input inset" type="password" name="password" placeholder="••••••••" required />
+              </div>
+              <button class="btn btn-primary" type="submit">Log in</button>
+            </form>
+          </section>
+    </main>
+
+    <%- include("../partials/footer") %>

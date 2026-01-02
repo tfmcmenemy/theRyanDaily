@@ -1,0 +1,67 @@
+<%- include("../partials/head", { pageTitle }) %>
+  <%- include("../partials/nav", { activeTab }) %>
+
+    <main class="content">
+      <header class="page-header">
+        <h1>Admin</h1>
+        <p class="muted">Create updates and reply to questions.</p>
+      </header>
+
+      <div class="admin-actions">
+        <a class="btn btn-primary" href="/admin/updates/new">New update</a>
+        <a class="btn btn-soft" href="/updates">View site</a>
+        <a class="btn btn-soft" href="/admin/support">Edit Support</a>
+      </div>
+
+      <section class="card">
+        <h2 class="card-title">Pending questions</h2>
+
+        <% if (!pending || pending.length===0) { %>
+          <p class="muted">No unanswered questions right now.</p>
+          <% } else { %>
+            <div class="stack">
+              <% pending.forEach(q=> { %>
+                <div class="card card-nested">
+                  <div class="tiny muted">On: <strong>
+                      <%= q.update_title %>
+                    </strong></div>
+                  <div class="q-text preline">
+                    <%= q.question %>
+                  </div>
+
+                  <form method="post" action="/admin/questions/<%= q.id %>/answer" class="form">
+                    <div class="form-row">
+                      <label>Answer</label>
+                      <textarea class="input inset" name="answer" rows="3" placeholder="Reply…"></textarea>
+                    </div>
+                    <button class="btn btn-primary" type="submit">Post answer</button>
+                    <a class="btn btn-soft" href="/updates/<%= q.update_id %>#questions">Go to update</a>
+                  </form>
+                </div>
+                <% }) %>
+            </div>
+            <% } %>
+      </section>
+
+      <section class="card">
+        <h2 class="card-title">Recent updates</h2>
+        <% if (!updates || updates.length===0) { %>
+          <p class="muted">No updates yet.</p>
+          <% } else { %>
+            <ul class="list">
+              <% updates.forEach(u=> { %>
+                <li class="list-item">
+                  <a href="/updates/<%= u.id %>">
+                    <%= u.title %>
+                  </a>
+                  <span class="tiny muted">
+                    <%= new Date(u.created_at).toLocaleString() %>
+                  </span>
+                </li>
+                <% }) %>
+            </ul>
+            <% } %>
+      </section>
+    </main>
+
+    <%- include("../partials/footer") %>
