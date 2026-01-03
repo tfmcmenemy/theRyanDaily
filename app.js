@@ -14,6 +14,10 @@ const app = express();
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
+if (process.env.NODE_ENV === "production") {
+  app.set("trust proxy", 1);
+}
+
 // Disable helmet completely for debugging
 // app.use(
 //   helmet({
