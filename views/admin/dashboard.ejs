@@ -54,9 +54,12 @@
                   <a href="/updates/<%= u.id %>">
                     <%= u.title %>
                   </a>
-                  <span class="tiny muted">
-                    <%= new Date(u.created_at).toLocaleString() %>
-                  </span>
+                  <div style="display:flex; gap:10px; align-items:center;">
+                    <span class="tiny muted">
+                      <%= new Date(u.created_at).toLocaleString() %>
+                    </span>
+                    <a class="btn btn-soft" href="/admin/updates/<%= u.id %>/edit">Edit</a>
+                  </div>
                 </li>
                 <% }) %>
             </ul>

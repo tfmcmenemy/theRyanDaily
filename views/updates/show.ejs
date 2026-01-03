@@ -18,90 +18,108 @@
           <%= update.body || "" %>
         </div>
       </article>
-
-
-
-      <section class="stack" id="questions">
-        <div class="section-head">
-          <h2>Questions</h2>
-          <span class="pill">
-            <%= questions.length %>
-          </span>
+      <% if (isAdmin) { %>
+        <div class="admin-actions" style="margin-top:12px;">
+          <a class="btn btn-soft" href="/admin/updates/<%= update.id %>/edit">Edit update</a>
+          <form method="post" action="/admin/updates/<%= update.id %>/delete" style="margin:0;"
+            onsubmit="return confirm('Delete this update and all its questions?');">
+            <button class="btn btn-soft" type="submit">Delete</button>
+          </form>
         </div>
+        <% } %>
 
-        <% if (!questions || questions.length===0) { %>
-          <div class="card">
-            <p class="muted">No questions yet.</p>
-          </div>
-          <% } else { %>
-            <% questions.forEach(q=> { %>
+
+          <section class="stack" id="questions">
+            <div class="section-head">
+              <h2>Questions</h2>
+              <span class="pill">
+                <%= questions.length %>
+              </span>
+            </div>
+
+            <% if (!questions || questions.length===0) { %>
               <div class="card">
-                <div class="q-head">
-                  <div>
-                    <div class="tiny muted">
-                      <%= q.asker_name ? q.asker_name : "Anonymous" %>
-                        • <%= new Date(q.asked_at).toLocaleString() %>
-                    </div>
-                    <div class="q-text preline">
-                      <%= q.question %>
-                    </div>
-                  </div>
-                </div>
+                <p class="muted">No questions yet.</p>
+              </div>
+              <% } else { %>
+                <% questions.forEach(q=> { %>
 
-                <% if (q.answer) { %>
-                  <div class="answer">
-                    <div class="answer-label">Answer</div>
-                    <div>
-                      <div class="preline">
-                        <%= q.answer %>
+                  <div class="card">
+                    <div class="q-head">
+                      <div>
+                        <div class="tiny muted">
+                          <%= q.asker_name ? q.asker_name : "Anonymous" %>
+                            • <%= new Date(q.asked_at).toLocaleString() %>
+                        </div>
+                        <div class="q-text preline">
+                          <%= q.question %>
+                        </div>
                       </div>
                     </div>
-                    <div class="tiny muted">
-                      <%= q.answered_at ? new Date(q.answered_at).toLocaleString() : "" %>
-                    </div>
+                    <% if (isAdmin) { %>
+                      <div class="admin-actions" style="margin-top:10px;">
+                        <a class="btn btn-soft" href="/admin/questions/<%= q.id %>/edit">Edit</a>
+                        <form method="post" action="/admin/questions/<%= q.id %>/delete" style="margin:0;"
+                          onsubmit="return confirm('Delete this question?');">
+                          <button class="btn btn-soft" type="submit">Delete</button>
+                        </form>
+                      </div>
+                      <% } %>
+                        <% if (q.answer) { %>
+                          <div class="answer">
+                            <div class="answer-label">Answer</div>
+                            <div>
+                              <div class="preline">
+                                <%= q.answer %>
+                              </div>
+                            </div>
+                            <div class="tiny muted">
+                              <%= q.answered_at ? new Date(q.answered_at).toLocaleString() : "" %>
+                            </div>
+                          </div>
+                          <% } else { %>
+                            <div class="tiny muted">Awaiting reply.</div>
+                            <% } %>
                   </div>
-                  <% } else { %>
-                    <div class="tiny muted">Awaiting reply.</div>
+                  <% }) %>
                     <% } %>
+          </section>
+
+          <details class="card collapse" id="ask">
+            <summary class="collapse-summary">
+              <div class="collapse-title">
+                Ask a question
+                <span class="collapse-sub muted">Tap to open</span>
               </div>
-              <% }) %>
-                <% } %>
-      </section>
+              <span class="collapse-chevron" aria-hidden="true">⌄</span>
+            </summary>
 
-      <details class="card collapse" id="ask">
-        <summary class="collapse-summary">
-          <div class="collapse-title">
-            Ask a question
-            <span class="collapse-sub muted">Tap to open</span>
-          </div>
-          <span class="collapse-chevron" aria-hidden="true">⌄</span>
-        </summary>
+            <!-- Animated container -->
+            <div class="collapse-anim" aria-hidden="false">
+              <div class="collapse-anim-inner">
+                <div class="collapse-body">
+                  <p class="muted">Your question stays attached to this update, so everyone can see the reply.</p>
 
-        <!-- Animated container -->
-        <div class="collapse-anim" aria-hidden="false">
-          <div class="collapse-anim-inner">
-            <div class="collapse-body">
-              <p class="muted">Your question stays attached to this update, so everyone can see the reply.</p>
-
-              <form method="post" action="/updates/<%= update.id %>/questions" class="form">
-                <div class="form-row">
-                  <label>Name (optional)</label>
-                  <input class="input inset" name="asker_name" placeholder="Your name" />
+                  <form method="post" action="/updates/<%= update.id %>/questions" class="form">
+                    <div class="form-row">
+                      <label>Name (optional)</label>
+                      <input class="input inset" name="asker_name" placeholder="Your name" />
+                    </div>
+                    <div class="form-row">
+                      <label>Contact (optional)</label>
+                      <input class="input inset" name="asker_contact" placeholder="Email or phone (optional)" />
+                    </div>
+                    <div class="form-row">
+                      <label>Question</label>
+                      <textarea class="input inset" name="question" rows="4"
+                        placeholder="Type your question…"></textarea>
+                    </div>
+                    <button class="btn btn-primary" type="submit">Post question</button>
+                  </form>
                 </div>
-                <div class="form-row">
-                  <label>Contact (optional)</label>
-                  <input class="input inset" name="asker_contact" placeholder="Email or phone (optional)" />
-                </div>
-                <div class="form-row">
-                  <label>Question</label>
-                  <textarea class="input inset" name="question" rows="4" placeholder="Type your question…"></textarea>
-                </div>
-                <button class="btn btn-primary" type="submit">Post question</button>
-              </form>
+              </div>
             </div>
-          </div>
-        </div>
-      </details>
+          </details>
     </main>
 
     <%- include("../partials/footer") %>

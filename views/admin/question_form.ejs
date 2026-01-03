@@ -1,0 +1,47 @@
+<%- include("../partials/head", { pageTitle }) %>
+    <%- include("../partials/nav", { activeTab }) %>
+
+        <main class="content">
+            <a class="back-link" href="/updates/<%= form.update_id %>#questions">← Back to update</a>
+
+            <header class="page-header">
+                <h1>Edit question</h1>
+                <p class="muted">On: <strong>
+                        <%= form.update_title %>
+                    </strong></p>
+            </header>
+
+            <% if (typeof error !=="undefined" ) { %>
+                <div class="alert alert-bad">
+                    <%= error %>
+                </div>
+                <% } %>
+
+                    <section class="card">
+                        <form method="post" action="/admin/questions/<%= form.id %>" class="form">
+                            <div class="form-row">
+                                <label>Question</label>
+                                <textarea class="input inset" name="question"
+                                    rows="5"><%= form.question || '' %></textarea>
+                            </div>
+
+                            <div class="form-row">
+                                <label>Answer (leave blank to clear)</label>
+                                <textarea class="input inset" name="answer" rows="5"><%= form.answer || '' %></textarea>
+                            </div>
+
+                            <button class="btn btn-primary" type="submit">Save</button>
+                            <a class="btn btn-soft" href="/updates/<%= form.update_id %>#questions">Cancel</a>
+                        </form>
+                    </section>
+
+                    <section class="card" style="margin-top:14px;">
+                        <h2 class="card-title">Danger zone</h2>
+                        <form method="post" action="/admin/questions/<%= form.id %>/delete"
+                            onsubmit="return confirm('Delete this question?');">
+                            <button class="btn btn-soft" type="submit">Delete question</button>
+                        </form>
+                    </section>
+        </main>
+
+        <%- include("../partials/footer") %>

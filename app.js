@@ -61,7 +61,7 @@ app.use((req, res) => {
     .status(404)
     .render("pages/notfound", { pageTitle: "Not found", activeTab: "" });
 });
-``;
+
 const port = process.env.PORT || 3000;
 app.listen(port, "0.0.0.0", () => {
   console.log(`Server began running at ${new Date().toLocaleString()}`);

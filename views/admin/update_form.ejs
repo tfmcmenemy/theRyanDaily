@@ -1,0 +1,51 @@
+<%- include("../partials/head", { pageTitle }) %>
+    <%- include("../partials/nav", { activeTab }) %>
+
+        <main class="content">
+            <a class="back-link" href="/admin">← Back to admin</a>
+
+            <header class="page-header">
+                <h1>
+                    <%= mode==="edit" ? "Edit update" : "New update" %>
+                </h1>
+                <p class="muted">Update the title or text. Deleting removes its questions too.</p>
+            </header>
+
+            <% if (typeof error !=="undefined" ) { %>
+                <div class="alert alert-bad">
+                    <%= error %>
+                </div>
+                <% } %>
+
+                    <section class="card">
+                        <form method="post"
+                            action="<%= mode === 'edit' ? ('/admin/updates/' + form.id) : '/admin/updates' %>"
+                            class="form">
+                            <div class="form-row">
+                                <label>Title</label>
+                                <input class="input inset" name="title" value="<%= form.title || '' %>" />
+                            </div>
+
+                            <div class="form-row">
+                                <label>Update text</label>
+                                <textarea class="input inset" name="body" rows="10"><%= form.body || '' %></textarea>
+                            </div>
+
+                            <button class="btn btn-primary" type="submit">Save</button>
+                            <a class="btn btn-soft" href="/updates/<%= form.id %>">Cancel</a>
+                        </form>
+                    </section>
+
+                    <% if (mode==="edit" ) { %>
+                        <section class="card" style="margin-top:14px;">
+                            <h2 class="card-title">Danger zone</h2>
+                            <p class="muted">This permanently deletes the update and all attached questions.</p>
+                            <form method="post" action="/admin/updates/<%= form.id %>/delete"
+                                onsubmit="return confirm('Delete this update and all its questions?');">
+                                <button class="btn btn-soft" type="submit">Delete update</button>
+                            </form>
+                        </section>
+                        <% } %>
+        </main>
+
+        <%- include("../partials/footer") %>

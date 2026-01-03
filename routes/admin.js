@@ -228,5 +228,123 @@ router.post("/support/:id/delete", requireAdmin, async (req, res) => {
   await db.none(`DELETE FROM support_items WHERE id=$1`, [id]);
   res.redirect("/admin/support");
 });
+// ---- Update editor ----
+router.get("/updates/:id/edit", requireAdmin, async (req, res) => {
+  const id = Number(req.params.id);
+  const update = await db.oneOrNone(`SELECT * FROM updates WHERE id=$1`, [id]);
+  if (!update) return res.redirect("/admin");
 
+  res.render("admin/update_form", {
+    pageTitle: "Edit Update",
+    activeTab: "",
+    mode: "edit",
+    form: update,
+  });
+});
+
+router.post("/updates/:id", requireAdmin, async (req, res) => {
+  const id = Number(req.params.id);
+  const title = String(req.body.title || "").trim();
+  const body = String(req.body.body || "").trim();
+
+  if (!title || !body) {
+    return res.status(400).render("admin/update_form", {
+      pageTitle: "Edit Update",
+      activeTab: "",
+      mode: "edit",
+      error: "Title and update text are required.",
+      form: { id, title, body },
+    });
+  }
+
+  await db.none(`UPDATE updates SET title=$1, body=$2 WHERE id=$3`, [
+    title,
+    body,
+    id,
+  ]);
+
+  res.redirect(`/updates/${id}`);
+});
+
+router.post("/updates/:id/delete", requireAdmin, async (req, res) => {
+  const id = Number(req.params.id);
+  await db.none(`DELETE FROM updates WHERE id=$1`, [id]); // cascades questions
+  res.redirect("/admin");
+});
+
+// ---- Question editor ----
+router.get("/questions/:id/edit", requireAdmin, async (req, res) => {
+  const id = Number(req.params.id);
+  const q = await db.oneOrNone(
+    `SELECT q.*, u.title AS update_title
+     FROM questions q
+     JOIN updates u ON u.id = q.update_id
+     WHERE q.id=$1`,
+    [id]
+  );
+  if (!q) return res.redirect("/admin");
+
+  res.render("admin/question_form", {
+    pageTitle: "Edit Question",
+    activeTab: "",
+    form: q,
+  });
+});
+
+router.post("/questions/:id", requireAdmin, async (req, res) => {
+  const id = Number(req.params.id);
+  const question = String(req.body.question || "").trim();
+  const answer = String(req.body.answer || "").trim();
+
+  if (!question) {
+    const q = await db.oneOrNone(
+      `SELECT q.*, u.title AS update_title
+       FROM questions q
+       JOIN updates u ON u.id = q.update_id
+       WHERE q.id=$1`,
+      [id]
+    );
+
+    return res.status(400).render("admin/question_form", {
+      pageTitle: "Edit Question",
+      activeTab: "",
+      error: "Question text cannot be empty.",
+      form: q || { id, question, answer },
+    });
+  }
+
+  // If answer is blank, clear it and answered_at
+  if (!answer) {
+    await db.none(
+      `UPDATE questions
+       SET question=$1, answer=NULL, answered_at=NULL
+       WHERE id=$2`,
+      [question, id]
+    );
+  } else {
+    await db.none(
+      `UPDATE questions
+       SET question=$1, answer=$2, answered_at=COALESCE(answered_at, NOW())
+       WHERE id=$3`,
+      [question, answer, id]
+    );
+  }
+
+  // Redirect back to the update
+  const row = await db.one(`SELECT update_id FROM questions WHERE id=$1`, [id]);
+  res.redirect(`/updates/${row.update_id}#questions`);
+});
+
+router.post("/questions/:id/delete", requireAdmin, async (req, res) => {
+  const id = Number(req.params.id);
+  const row = await db.oneOrNone(
+    `SELECT update_id FROM questions WHERE id=$1`,
+    [id]
+  );
+  if (row) {
+    await db.none(`DELETE FROM questions WHERE id=$1`, [id]);
+    return res.redirect(`/updates/${row.update_id}#questions`);
+  }
+  res.redirect("/admin");
+});
 module.exports = router;
