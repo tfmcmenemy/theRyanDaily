@@ -50,6 +50,11 @@ app.use((req, res, next) => {
   next();
 });
 
+// Health check endpoint for Digital Ocean
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "ok" });
+});
+
 app.get("/", (req, res) => res.redirect("/updates"));
 
 app.use("/", pagesRoutes);
