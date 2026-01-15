@@ -1,11 +1,42 @@
 const express = require("express");
 const bcrypt = require("bcrypt");
+const crypto = require("crypto");
+const multer = require("multer");
 const router = express.Router();
 const { db } = require("../db");
+const { uploadObject, getPublicUrl } = require("../lib/spaces");
+const { processImageBuffer } = require("../lib/image-processing");
 
 function requireAdmin(req, res, next) {
   if (req.session.isAdmin) return next();
   return res.redirect("/admin/login");
+}
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype && file.mimetype.startsWith("image/")) return cb(null, true);
+    const err = new Error("Only image uploads are allowed.");
+    err.code = "INVALID_FILE_TYPE";
+    return cb(err);
+  },
+});
+
+function buildUpdateKey(extension) {
+  const now = new Date();
+  const year = String(now.getFullYear());
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const timestamp = Date.now();
+  const random = crypto.randomBytes(6).toString("hex");
+  return `ryan-daily/updates/${year}/${month}/${timestamp}-${random}.${extension}`;
+}
+
+function mapUploadError(err) {
+  if (!err) return null;
+  if (err.code === "LIMIT_FILE_SIZE") return "Each image must be 10MB or smaller.";
+  if (err.code === "INVALID_FILE_TYPE") return "Only image uploads are allowed.";
+  return "Upload failed. Please try again.";
 }
 
 router.get("/login", (req, res) => {
@@ -75,25 +106,73 @@ router.get("/updates/new", requireAdmin, (req, res) => {
   });
 });
 
-router.post("/updates", requireAdmin, async (req, res) => {
-  const title = String(req.body.title || "").trim();
-  const body = String(req.body.body || "").trim();
+router.post("/updates", requireAdmin, (req, res) => {
+  upload.array("images", 12)(req, res, async (err) => {
+    const uploadError = mapUploadError(err);
+    const title = String(req.body.title || "").trim();
+    const body = String(req.body.body || "").trim();
 
-  if (!title || !body) {
-    return res.status(400).render("updates/new", {
-      pageTitle: "New Update",
-      activeTab: "",
-      error: "Title and update text are required.",
-      form: { title, body },
-    });
-  }
+    if (uploadError) {
+      return res.status(400).render("updates/new", {
+        pageTitle: "New Update",
+        activeTab: "",
+        error: uploadError,
+        form: { title, body },
+      });
+    }
 
-  const created = await db.one(
-    `INSERT INTO updates(title, body) VALUES($1,$2) RETURNING id`,
-    [title, body]
-  );
+    if (!title || !body) {
+      return res.status(400).render("updates/new", {
+        pageTitle: "New Update",
+        activeTab: "",
+        error: "Title and update text are required.",
+        form: { title, body },
+      });
+    }
 
-  res.redirect(`/updates/${created.id}`);
+    const created = await db.one(
+      `INSERT INTO updates(title, body) VALUES($1,$2) RETURNING id`,
+      [title, body]
+    );
+
+    try {
+      const files = Array.isArray(req.files) ? req.files : [];
+      for (const file of files) {
+        const { buffer, width, height, sizeBytes } = await processImageBuffer(
+          file
+        );
+        const key = buildUpdateKey("webp");
+        const publicUrl = getPublicUrl(key);
+
+        await uploadObject({
+          buffer,
+          key,
+          contentType: "image/webp",
+          cacheControl: "public, max-age=31536000, immutable",
+        });
+
+        await db.none(
+          `INSERT INTO update_images
+           (update_id, spaces_key, public_url, mime_type, size_bytes, width, height)
+           VALUES ($1,$2,$3,$4,$5,$6,$7)`,
+          [
+            created.id,
+            key,
+            publicUrl,
+            file.mimetype || null,
+            sizeBytes,
+            width,
+            height,
+          ]
+        );
+      }
+    } catch (uploadErr) {
+      console.error("Update image upload failed:", uploadErr);
+      return res.redirect(`/updates/${created.id}?error=Image%20upload%20failed`);
+    }
+
+    return res.redirect(`/updates/${created.id}`);
+  });
 });
 
 router.post("/questions/:id/answer", requireAdmin, async (req, res) => {
@@ -242,28 +321,67 @@ router.get("/updates/:id/edit", requireAdmin, async (req, res) => {
   });
 });
 
-router.post("/updates/:id", requireAdmin, async (req, res) => {
-  const id = Number(req.params.id);
-  const title = String(req.body.title || "").trim();
-  const body = String(req.body.body || "").trim();
+router.post("/updates/:id", requireAdmin, (req, res) => {
+  upload.array("images", 12)(req, res, async (err) => {
+    const id = Number(req.params.id);
+    const title = String(req.body.title || "").trim();
+    const body = String(req.body.body || "").trim();
+    const uploadError = mapUploadError(err);
 
-  if (!title || !body) {
-    return res.status(400).render("admin/update_form", {
-      pageTitle: "Edit Update",
-      activeTab: "",
-      mode: "edit",
-      error: "Title and update text are required.",
-      form: { id, title, body },
-    });
-  }
+    if (!title || !body || uploadError) {
+      return res.status(400).render("admin/update_form", {
+        pageTitle: "Edit Update",
+        activeTab: "",
+        mode: "edit",
+        error: uploadError || "Title and update text are required.",
+        form: { id, title, body },
+      });
+    }
 
-  await db.none(`UPDATE updates SET title=$1, body=$2 WHERE id=$3`, [
-    title,
-    body,
-    id,
-  ]);
+    await db.none(`UPDATE updates SET title=$1, body=$2 WHERE id=$3`, [
+      title,
+      body,
+      id,
+    ]);
 
-  res.redirect(`/updates/${id}`);
+    try {
+      const files = Array.isArray(req.files) ? req.files : [];
+      for (const file of files) {
+        const { buffer, width, height, sizeBytes } = await processImageBuffer(
+          file
+        );
+        const key = buildUpdateKey("webp");
+        const publicUrl = getPublicUrl(key);
+
+        await uploadObject({
+          buffer,
+          key,
+          contentType: "image/webp",
+          cacheControl: "public, max-age=31536000, immutable",
+        });
+
+        await db.none(
+          `INSERT INTO update_images
+           (update_id, spaces_key, public_url, mime_type, size_bytes, width, height)
+           VALUES ($1,$2,$3,$4,$5,$6,$7)`,
+          [
+            id,
+            key,
+            publicUrl,
+            file.mimetype || null,
+            sizeBytes,
+            width,
+            height,
+          ]
+        );
+      }
+    } catch (uploadErr) {
+      console.error("Update image upload failed:", uploadErr);
+      return res.redirect(`/updates/${id}?error=Image%20upload%20failed`);
+    }
+
+    return res.redirect(`/updates/${id}`);
+  });
 });
 
 router.post("/updates/:id/delete", requireAdmin, async (req, res) => {

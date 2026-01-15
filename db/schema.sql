@@ -36,3 +36,39 @@ CREATE TABLE IF NOT EXISTS gallery_items (
   caption       TEXT,
   created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- Gallery images stored in Spaces
+CREATE TABLE IF NOT EXISTS gallery_images (
+  id            SERIAL PRIMARY KEY,
+  title         TEXT,
+  caption       TEXT,
+  spaces_key    TEXT NOT NULL UNIQUE,
+  public_url    TEXT NOT NULL,
+  mime_type     TEXT,
+  size_bytes    INTEGER,
+  width         INTEGER,
+  height        INTEGER,
+  created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_gallery_images_created_at
+  ON gallery_images (created_at DESC);
+
+-- Images attached to updates
+CREATE TABLE IF NOT EXISTS update_images (
+  id            SERIAL PRIMARY KEY,
+  update_id     INTEGER NOT NULL REFERENCES updates(id) ON DELETE CASCADE,
+  spaces_key    TEXT NOT NULL UNIQUE,
+  public_url    TEXT NOT NULL,
+  mime_type     TEXT,
+  size_bytes    INTEGER,
+  width         INTEGER,
+  height        INTEGER,
+  created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_update_images_update_id
+  ON update_images (update_id);
+
+CREATE INDEX IF NOT EXISTS idx_update_images_created_at
+  ON update_images (created_at DESC);

@@ -14,7 +14,7 @@
   <% } %>
 
   <section class="card">
-    <form method="post" action="/admin/updates" class="form">
+    <form method="post" action="/admin/updates" class="form" enctype="multipart/form-data">
       <div class="form-row">
         <label>Title</label>
         <input class="input inset" name="title" value="<%= (form && form.title) || '' %>" placeholder="Today’s update…" />
@@ -22,6 +22,11 @@
       <div class="form-row">
         <label>Update text</label>
         <textarea class="input inset" name="body" rows="10" placeholder="Write the update…"><%= (form && form.body) || '' %></textarea>
+      </div>
+      <div class="form-row">
+        <label>Photos (optional)</label>
+        <input class="input inset" name="images" type="file" accept="image/*" multiple />
+        <p class="tiny muted">Up to 12 images, 10MB each. HEIC supported.</p>
       </div>
       <button class="btn btn-primary" type="submit">Publish</button>
     </form>

@@ -4,20 +4,43 @@
     <main class="content">
       <a class="back-link" href="/updates">← Back</a>
 
+      <% if (error) { %>
+        <div class="alert alert-bad"><%= error %></div>
+      <% } %>
+
       <article class="card">
         <div class="card-top">
           <h1 class="card-title">
             <%= update.title %>
           </h1>
-          <div class="tiny muted">
+          <time class="tiny muted js-local-time" data-local-time="<%= new Date(update.created_at).toISOString() %>">
             <%= new Date(update.created_at).toLocaleString() %>
-          </div>
+          </time>
         </div>
 
         <div class="prose preline">
           <%= update.body || "" %>
         </div>
       </article>
+
+      <% if (images && images.length) { %>
+        <section class="gallery-grid update-gallery" style="margin-top:16px;">
+          <% images.forEach((img, index) => { %>
+            <figure class="card gallery-card">
+              <img
+                class="gallery-img"
+                src="<%= img.public_url %>"
+                alt="<%= update.title || 'Update photo' %>"
+                loading="lazy"
+                data-lightbox="true"
+                data-index="<%= index %>"
+                data-title="<%= update.title || '' %>"
+                data-caption=""
+              />
+            </figure>
+          <% }) %>
+        </section>
+      <% } %>
       <% if (isAdmin) { %>
         <div class="admin-actions" style="margin-top:12px;">
           <a class="btn btn-soft" href="/admin/updates/<%= update.id %>/edit">Edit update</a>
@@ -49,7 +72,10 @@
                       <div>
                         <div class="tiny muted">
                           <%= q.asker_name ? q.asker_name : "Anonymous" %>
-                            • <%= new Date(q.asked_at).toLocaleString() %>
+                            •
+                            <time class="js-local-time" data-local-time="<%= new Date(q.asked_at).toISOString() %>">
+                              <%= new Date(q.asked_at).toLocaleString() %>
+                            </time>
                         </div>
                         <div class="q-text preline">
                           <%= q.question %>
@@ -74,7 +100,11 @@
                               </div>
                             </div>
                             <div class="tiny muted">
-                              <%= q.answered_at ? new Date(q.answered_at).toLocaleString() : "" %>
+                              <% if (q.answered_at) { %>
+                                <time class="js-local-time" data-local-time="<%= new Date(q.answered_at).toISOString() %>">
+                                  <%= new Date(q.answered_at).toLocaleString() %>
+                                </time>
+                              <% } %>
                             </div>
                           </div>
                           <% } else { %>
@@ -122,4 +152,23 @@
           </details>
     </main>
 
+    <div class="lightbox" id="lightbox" aria-hidden="true">
+      <div class="lightbox-overlay" data-action="close"></div>
+      <div class="lightbox-dialog" role="dialog" aria-modal="true" aria-label="Image preview">
+        <button class="lightbox-close" type="button" data-action="close" aria-label="Close image">X</button>
+        <button class="lightbox-nav lightbox-prev" type="button" data-action="prev" aria-label="Previous image">
+          &larr;
+        </button>
+        <img class="lightbox-img" alt="" />
+        <button class="lightbox-nav lightbox-next" type="button" data-action="next" aria-label="Next image">
+          &rarr;
+        </button>
+        <div class="lightbox-meta">
+          <div class="lightbox-title"></div>
+          <div class="lightbox-caption"></div>
+        </div>
+      </div>
+    </div>
+
+    <script src="/js/gallery.js"></script>
     <%- include("../partials/footer") %>

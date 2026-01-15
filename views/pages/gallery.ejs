@@ -1,33 +1,98 @@
 <%- include("../partials/head", { pageTitle }) %>
-  <%- include("../partials/nav", { activeTab }) %>
+<%- include("../partials/nav", { activeTab }) %>
 
-    <main class="content">
-      <header class="page-header">
-        <h1>Gallery</h1>
-        <p class="muted">Photos and small wins—easy to find and share.</p>
-      </header>
+<main class="content">
+  <header class="page-header">
+    <h1>Gallery</h1>
+    <p class="muted">Photos and small wins—easy to find and share.</p>
+  </header>
 
-      <section class="gallery">
-        <% if (!items || items.length===0) { %>
-          <div class="card">
-            <h2 class="card-title">No photos yet</h2>
-            <!-- <p class="muted">For now this uses image URLs stored in the database.</p>
-        <p class="tiny muted">Later we can add uploads (S3/Spaces/Cloudinary).</p> -->
-          </div>
-          <!-- test -->
-          <% } else { %>
-            <% items.forEach(it=> { %>
-              <figure class="card gallery-card">
-                <img class="gallery-img" src="<%= it.image_url %>" alt="<%= it.caption || 'Photo' %>" />
-                <% if (it.caption) { %>
-                  <figcaption class="tiny muted">
-                    <%= it.caption %>
-                  </figcaption>
-                  <% } %>
-              </figure>
-              <% }) %>
-                <% } %>
-      </section>
-    </main>
+  <% if (error) { %>
+    <div class="alert alert-bad"><%= error %></div>
+  <% } %>
+  <% if (success) { %>
+    <div class="alert alert-good"><%= success %></div>
+  <% } %>
 
-    <%- include("../partials/footer") %>
+  <% if (isAdmin) { %>
+    <section class="card gallery-upload">
+      <h2 class="card-title">Upload a new photo</h2>
+      <form class="form" action="/gallery/upload" method="post" enctype="multipart/form-data">
+        <div class="form-row">
+          <label for="title">Title</label>
+          <input class="input inset" id="title" name="title" type="text" value="<%= form?.title || '' %>" />
+        </div>
+        <div class="form-row">
+          <label for="caption">Caption</label>
+          <textarea class="input inset" id="caption" name="caption" rows="3"><%= form?.caption || '' %></textarea>
+        </div>
+        <div class="form-row">
+          <label for="images">Images</label>
+          <input class="input inset" id="images" name="images" type="file" accept="image/*" multiple required />
+          <p class="tiny muted">Up to 12 files, 10MB each. Images are optimized and saved as WebP.</p>
+        </div>
+        <button class="btn" type="submit">Upload photo</button>
+      </form>
+    </section>
+  <% } %>
+
+  <section class="gallery-grid">
+    <% if (!items || items.length === 0) { %>
+      <div class="card">
+        <h2 class="card-title">No photos yet</h2>
+        <p class="muted">Check back soon for new moments.</p>
+      </div>
+    <% } else { %>
+      <% items.forEach((it, index) => { %>
+        <figure class="card gallery-card">
+          <img
+            class="gallery-img"
+            src="<%= it.public_url %>"
+            alt="<%= it.caption || it.title || 'Gallery photo' %>"
+            loading="lazy"
+            data-lightbox="true"
+            data-index="<%= index %>"
+            data-caption="<%= it.caption || '' %>"
+            data-title="<%= it.title || '' %>"
+          />
+          <% if (it.title || it.caption) { %>
+            <figcaption class="gallery-caption">
+              <% if (it.title) { %>
+                <div class="caption-title"><%= it.title %></div>
+              <% } %>
+              <% if (it.caption) { %>
+                <div class="tiny muted"><%= it.caption %></div>
+              <% } %>
+            </figcaption>
+          <% } %>
+          <% if (isAdmin) { %>
+            <form class="gallery-delete" action="/gallery/<%= it.id %>/delete" method="post">
+              <button class="btn btn-soft" type="submit">Delete</button>
+            </form>
+          <% } %>
+        </figure>
+      <% }) %>
+    <% } %>
+  </section>
+</main>
+
+<div class="lightbox" id="lightbox" aria-hidden="true">
+  <div class="lightbox-overlay" data-action="close"></div>
+  <div class="lightbox-dialog" role="dialog" aria-modal="true" aria-label="Image preview">
+    <button class="lightbox-close" type="button" data-action="close" aria-label="Close image">X</button>
+    <button class="lightbox-nav lightbox-prev" type="button" data-action="prev" aria-label="Previous image">
+      &larr;
+    </button>
+    <img class="lightbox-img" alt="" />
+    <button class="lightbox-nav lightbox-next" type="button" data-action="next" aria-label="Next image">
+      &rarr;
+    </button>
+    <div class="lightbox-meta">
+      <div class="lightbox-title"></div>
+      <div class="lightbox-caption"></div>
+    </div>
+  </div>
+</div>
+
+<script src="/js/gallery.js"></script>
+<%- include("../partials/footer") %>

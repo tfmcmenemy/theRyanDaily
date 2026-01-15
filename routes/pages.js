@@ -48,17 +48,6 @@ router.get("/support", async (req, res) => {
   });
 });
 
-router.get("/gallery", async (req, res) => {
-  const items = await db.any(
-    `SELECT * FROM gallery_items ORDER BY created_at DESC LIMIT 60`
-  );
-  res.render("pages/gallery", {
-    pageTitle: "Gallery",
-    activeTab: "gallery",
-    items,
-  });
-});
-
 router.get("/notfound", (req, res) => {
   res
     .status(404)

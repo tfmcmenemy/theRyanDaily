@@ -8,6 +8,7 @@ require("dotenv").config({ quiet: true });
 const pagesRoutes = require("./routes/pages");
 const updatesRoutes = require("./routes/updates");
 const adminRoutes = require("./routes/admin");
+const galleryRoutes = require("./routes/gallery");
 
 const app = express();
 
@@ -62,6 +63,7 @@ app.get("/health", (req, res) => {
 app.get("/", (req, res) => res.redirect("/updates"));
 
 app.use("/", pagesRoutes);
+app.use("/gallery", galleryRoutes);
 app.use("/updates", updatesRoutes);
 app.use("/admin", adminRoutes);
 

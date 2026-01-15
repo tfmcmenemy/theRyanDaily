@@ -24,8 +24,17 @@ router.get("/:id", async (req, res) => {
   const update = await db.oneOrNone(`SELECT * FROM updates WHERE id=$1`, [id]);
   if (!update) return res.status(404).redirect("/notfound");
 
+  const error = req.query.error ? String(req.query.error) : null;
+
   const questions = await db.any(
     `SELECT * FROM questions WHERE update_id=$1 ORDER BY asked_at DESC`,
+    [id]
+  );
+
+  const images = await db.any(
+    `SELECT * FROM update_images
+     WHERE update_id=$1
+     ORDER BY created_at DESC, id DESC`,
     [id]
   );
 
@@ -34,6 +43,8 @@ router.get("/:id", async (req, res) => {
     activeTab: "updates",
     update,
     questions,
+    images,
+    error,
   });
 });
 

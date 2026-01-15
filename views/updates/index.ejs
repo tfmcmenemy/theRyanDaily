@@ -1,32 +1,39 @@
 <%- include("../partials/head", { pageTitle }) %>
-<%- include("../partials/nav", { activeTab }) %>
+  <%- include("../partials/nav", { activeTab }) %>
 
-<main class="content">
-  <header class="page-header">
-    <h1>Updates</h1>
-    <p class="muted">Latest first. Tap an update to read and ask questions.</p>
-  </header>
+    <main class="content">
+      <header class="page-header">
+        <h1>Updates</h1>
+        <p class="muted">Latest first. Tap an update to read and ask questions.</p>
+      </header>
 
-  <% if (!updates || updates.length === 0) { %>
-    <section class="card">
-      <h2 class="card-title">No updates yet</h2>
-      <p class="muted">When your sister posts, they’ll show up here.</p>
-      <a class="btn btn-soft" href="/admin/login">Admin login</a>
-    </section>
-  <% } else { %>
-    <section class="stack">
-      <% updates.forEach(u => { %>
-        <article class="card">
-          <div class="card-top">
-            <h2 class="card-title"><%= u.title %></h2>
-            <div class="tiny muted"><%= new Date(u.created_at).toLocaleString() %></div>
-          </div>
-          <p class="muted"><%= (u.body || "").slice(0, 160) %><%= (u.body || "").length > 160 ? "…" : "" %></p>
-          <a class="btn btn-primary" href="/updates/<%= u.id %>">Read</a>
-        </article>
-      <% }) %>
-    </section>
-  <% } %>
-</main>
+      <% if (!updates || updates.length===0) { %>
+        <section class="card">
+          <h2 class="card-title">No updates yet</h2>
+          <!-- <p class="muted">When your sister posts, they’ll show up here.</p> -->
+          <a class="btn btn-soft" href="/admin/login">Admin login</a>
+        </section>
+        <% } else { %>
+          <section class="stack">
+            <% updates.forEach(u=> { %>
+              <article class="card">
+                <div class="card-top">
+                  <h2 class="card-title">
+                    <%= u.title %>
+                  </h2>
+                  <time class="tiny muted js-local-time" data-local-time="<%= new Date(u.created_at).toISOString() %>">
+                    <%= new Date(u.created_at).toLocaleString() %>
+                  </time>
+                </div>
+                <p class="muted">
+                  <%= (u.body || "" ).slice(0, 160) %>
+                    <%= (u.body || "" ).length> 160 ? "…" : "" %>
+                </p>
+                <a class="btn btn-primary" href="/updates/<%= u.id %>">Read</a>
+              </article>
+              <% }) %>
+          </section>
+          <% } %>
+    </main>
 
-<%- include("../partials/footer") %>
+    <%- include("../partials/footer") %>

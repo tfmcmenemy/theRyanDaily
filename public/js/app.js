@@ -7,6 +7,21 @@
 })();
 
 (function () {
+  const formatter = new Intl.DateTimeFormat(undefined, {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
+
+  document.querySelectorAll("[data-local-time]").forEach((el) => {
+    const iso = el.getAttribute("data-local-time");
+    if (!iso) return;
+    const date = new Date(iso);
+    if (Number.isNaN(date.getTime())) return;
+    el.textContent = formatter.format(date);
+  });
+})();
+
+(function () {
   function smoothScrollToDetailsBottom(detailsEl) {
     // Let layout settle for a frame or two
     requestAnimationFrame(() => {
