@@ -6,29 +6,40 @@ document.addEventListener("DOMContentLoaded", () => {
   const imgEl = lightbox.querySelector(".lightbox-img");
   const titleEl = lightbox.querySelector(".lightbox-title");
   const captionEl = lightbox.querySelector(".lightbox-caption");
-  const metaEl = lightbox.querySelector(".lightbox-meta");
-  const closeButtons = lightbox.querySelectorAll('[data-action="close"]');
-  const prevButton = lightbox.querySelector('[data-action="prev"]');
-  const nextButton = lightbox.querySelector('[data-action="next"]');
 
-  const data = images.map((img) => ({
-    src: img.getAttribute("src"),
-    alt: img.getAttribute("alt") || "Gallery image",
-    title: img.dataset.title || "",
-    caption: img.dataset.caption || "",
-  }));
+  const captionBarEl = lightbox.querySelector(".lightbox-captionbar");
+  const counterEl = lightbox.querySelector(".lightbox-counter");
 
   let currentIndex = 0;
   let previousOverflow = "";
   let touchStartX = 0;
 
+  const data = images.map((img) => ({
+    src: img.getAttribute("src"),
+    alt: img.getAttribute("alt") || "Image",
+    title: img.dataset.title || "",
+    caption: img.dataset.caption || "",
+  }));
+
   function render() {
     const item = data[currentIndex];
     imgEl.src = item.src;
     imgEl.alt = item.alt;
-    titleEl.textContent = item.title;
-    captionEl.textContent = item.caption;
-    metaEl.style.display = item.title || item.caption ? "block" : "none";
+
+    if (titleEl) titleEl.textContent = item.title;
+    if (captionEl) captionEl.textContent = item.caption;
+
+    if (counterEl) {
+      counterEl.textContent = `${currentIndex + 1} / ${data.length}`;
+    }
+
+    const hasText =
+      (item.title && item.title.trim()) ||
+      (item.caption && item.caption.trim());
+
+    if (captionBarEl) {
+      captionBarEl.style.display = hasText ? "block" : "none";
+    }
   }
 
   function openLightbox(index) {
@@ -56,19 +67,27 @@ document.addEventListener("DOMContentLoaded", () => {
     render();
   }
 
+  // Open on click
   images.forEach((img, index) => {
+    img.style.cursor = "pointer";
     img.addEventListener("click", () => openLightbox(index));
   });
 
-  closeButtons.forEach((btn) => {
-    btn.addEventListener("click", closeLightbox);
+  // Click actions (overlay, close, arrows)
+  lightbox.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-action]");
+    const action = btn?.getAttribute("data-action");
+    if (!action) return;
+
+    if (action === "close") closeLightbox();
+    if (action === "prev") showPrev();
+    if (action === "next") showNext();
   });
 
-  prevButton.addEventListener("click", showPrev);
-  nextButton.addEventListener("click", showNext);
-
+  // Keyboard
   document.addEventListener("keydown", (event) => {
     if (!lightbox.classList.contains("is-open")) return;
+
     if (event.key === "Escape") {
       event.preventDefault();
       closeLightbox();
@@ -81,15 +100,17 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  lightbox.addEventListener("touchstart", (event) => {
+  // Swipe (on the image)
+  imgEl.addEventListener("touchstart", (event) => {
     if (!lightbox.classList.contains("is-open")) return;
     touchStartX = event.changedTouches[0].clientX;
   });
 
-  lightbox.addEventListener("touchend", (event) => {
+  imgEl.addEventListener("touchend", (event) => {
     if (!lightbox.classList.contains("is-open")) return;
     const touchEndX = event.changedTouches[0].clientX;
     const deltaX = touchEndX - touchStartX;
+
     if (Math.abs(deltaX) < 50) return;
     if (deltaX < 0) showNext();
     else showPrev();
