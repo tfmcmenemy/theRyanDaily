@@ -98,6 +98,44 @@ router.get("/", requireAdmin, async (req, res) => {
   });
 });
 
+router.get("/analytics", requireAdmin, async (req, res) => {
+  const last24 = await db.one(
+    `SELECT COUNT(*)::int AS count
+     FROM page_views
+     WHERE created_at >= NOW() - INTERVAL '24 hours'`
+  );
+  const last7 = await db.one(
+    `SELECT COUNT(*)::int AS count
+     FROM page_views
+     WHERE created_at >= NOW() - INTERVAL '7 days'`
+  );
+  const topPaths = await db.any(
+    `SELECT path, COUNT(*)::int AS views
+     FROM page_views
+     WHERE created_at >= NOW() - INTERVAL '7 days'
+     GROUP BY path
+     ORDER BY views DESC, path ASC
+     LIMIT 10`
+  );
+  const topRegions = await db.any(
+    `SELECT COALESCE(NULLIF(region, ''), 'Unknown') AS region, COUNT(*)::int AS views
+     FROM page_views
+     WHERE created_at >= NOW() - INTERVAL '7 days'
+     GROUP BY region
+     ORDER BY views DESC, region ASC
+     LIMIT 10`
+  );
+
+  res.render("admin/analytics", {
+    pageTitle: "Analytics",
+    activeTab: "",
+    last24: last24.count,
+    last7: last7.count,
+    topPaths,
+    topRegions,
+  });
+});
+
 router.get("/updates/new", requireAdmin, (req, res) => {
   res.render("updates/new", {
     pageTitle: "New Update",

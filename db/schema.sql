@@ -72,3 +72,21 @@ CREATE INDEX IF NOT EXISTS idx_update_images_update_id
 
 CREATE INDEX IF NOT EXISTS idx_update_images_created_at
   ON update_images (created_at DESC);
+
+-- Page view analytics
+CREATE TABLE IF NOT EXISTS page_views (
+  id            SERIAL PRIMARY KEY,
+  path          TEXT NOT NULL,
+  ip            TEXT,
+  country       TEXT,
+  region        TEXT,
+  city          TEXT,
+  user_agent    TEXT,
+  created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_page_views_created_at
+  ON page_views (created_at DESC);
+
+CREATE INDEX IF NOT EXISTS idx_page_views_path
+  ON page_views (path);

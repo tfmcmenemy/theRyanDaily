@@ -9,15 +9,13 @@ const pagesRoutes = require("./routes/pages");
 const updatesRoutes = require("./routes/updates");
 const adminRoutes = require("./routes/admin");
 const galleryRoutes = require("./routes/gallery");
+const pageViewsMiddleware = require("./middleware/pageViews");
 
 const app = express();
 
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
-
-if (process.env.NODE_ENV === "production") {
-  app.set("trust proxy", 1);
-}
+app.set("trust proxy", 1);
 
 // Disable helmet completely for debugging
 // app.use(
@@ -47,6 +45,7 @@ app.use(
 
 // Serve static files
 app.use(express.static(path.join(__dirname, "public")));
+app.use(pageViewsMiddleware);
 
 // Make these available in all templates
 app.use((req, res, next) => {

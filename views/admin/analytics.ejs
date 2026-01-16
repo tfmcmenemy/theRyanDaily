@@ -1,0 +1,62 @@
+<%- include("../partials/head", { pageTitle }) %>
+  <%- include("../partials/nav", { activeTab }) %>
+
+    <main class="content">
+      <header class="page-header">
+        <h1>Analytics</h1>
+        <p class="muted">Lightweight page view totals for the last 24 hours and 7 days.</p>
+      </header>
+
+      <div class="admin-actions">
+        <a class="btn btn-soft" href="/admin">Back to admin</a>
+        <a class="btn btn-soft" href="/updates">View site</a>
+      </div>
+
+      <section class="card">
+        <h2 class="card-title">Totals</h2>
+        <ul class="list">
+          <li class="list-item">
+            <span>Views last 24 hours</span>
+            <strong><%= last24 %></strong>
+          </li>
+          <li class="list-item">
+            <span>Views last 7 days</span>
+            <strong><%= last7 %></strong>
+          </li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2 class="card-title">Top paths (7 days)</h2>
+        <% if (!topPaths || topPaths.length === 0) { %>
+          <p class="muted">No page views logged yet.</p>
+        <% } else { %>
+          <ul class="list">
+            <% topPaths.forEach(item => { %>
+              <li class="list-item">
+                <span><%= item.path %></span>
+                <strong><%= item.views %></strong>
+              </li>
+            <% }) %>
+          </ul>
+        <% } %>
+      </section>
+
+      <section class="card">
+        <h2 class="card-title">Top regions (7 days)</h2>
+        <% if (!topRegions || topRegions.length === 0) { %>
+          <p class="muted">No regional data logged yet.</p>
+        <% } else { %>
+          <ul class="list">
+            <% topRegions.forEach(item => { %>
+              <li class="list-item">
+                <span><%= item.region %></span>
+                <strong><%= item.views %></strong>
+              </li>
+            <% }) %>
+          </ul>
+        <% } %>
+      </section>
+    </main>
+
+    <%- include("../partials/footer") %>
